@@ -63,10 +63,10 @@ def group_by_4(image:object, assembly_type:int, joint_size:int=None) -> object:
         bottom_right = image
         bottom_left = image
     elif assembly_type == 2:
-        top_right = image 
-        top_left = cv2.rotate(top_right, cv2.ROTATE_90_COUNTERCLOCKWISE)
-        bottom_right = cv2.rotate(top_right, cv2.ROTATE_90_CLOCKWISE)
-        bottom_left = cv2.rotate(top_right, cv2.ROTATE_180)
+        bottom_left = image
+        top_right = cv2.rotate(bottom_left, cv2.ROTATE_180) 
+        top_left = cv2.rotate(bottom_left, cv2.ROTATE_90_CLOCKWISE)    
+        bottom_right = cv2.rotate(bottom_left, cv2.ROTATE_90_COUNTERCLOCKWISE)
     elif assembly_type == 3:
         top_right = image 
         top_left = cv2.rotate(top_right, cv2.ROTATE_90_COUNTERCLOCKWISE)

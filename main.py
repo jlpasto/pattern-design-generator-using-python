@@ -21,8 +21,6 @@ def main(nom_motif, assemble_choice, assembly_type_choice, assembly_subtype_choi
     mkdir("output/" + nom_motif + "/" + Frise)
     mkdir("output/" + nom_motif + "/" + Frise_Content)
 
-    # for now 1, value should come from user input as paramater
-    assembly_type = 1
 
     # Sépare les couleurs du pattern pour récupérer les différents motifs
     pattern_path = f"patterns/{nom_motif}.png"    
@@ -46,11 +44,19 @@ def main(nom_motif, assemble_choice, assembly_type_choice, assembly_subtype_choi
         motif_path = f"{pattern_output_dir}/{motif}"
         motifs_output_dir1 = f"output/{nom_motif}/{Produit}/{num_motif}"
         motifs_output_dir2 = f"output/{nom_motif}/{Frise}/{num_motif}"
-        mkdir(motifs_output_dir1)        
-               
-        generate_motif_colors(motif_path, motifs_output_dir1, colors, assembly_type) # generate layer 1
-        generate_motif_colors_9x4_grid(motif_path, motifs_output_dir2, colors, assembly_type) # generate layer 2
+         
 
+        if assembly_type_choice == "both":
+            mkdir(motifs_output_dir1)
+            mkdir(motifs_output_dir2)   
+            generate_motif_colors(motif_path, motifs_output_dir1, colors, assembly_subtype_choice) # generate layer 1
+            generate_motif_colors_9x4_grid(motif_path, motifs_output_dir2, colors, assembly_subtype_choice) # generate layer 2
+        if assembly_type_choice == "product assembly":
+            mkdir(motifs_output_dir1)
+            generate_motif_colors(motif_path, motifs_output_dir1, colors, assembly_subtype_choice) # generate layer 1
+        if assembly_type_choice == "border assembly":
+            mkdir(motifs_output_dir2)
+            generate_motif_colors_9x4_grid(motif_path, motifs_output_dir2, colors, assembly_subtype_choice) # generate layer 2
         print(f"{num_motif} : OK") 
 
 
