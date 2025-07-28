@@ -51,21 +51,6 @@ def group_by_4(image:object, assembly_type:int, joint_size:int=None) -> object:
 
     output_image = np.zeros((size*2 + joint_size, size*2 + joint_size, 4), dtype=np.uint8)
 
-    # # Tourne 3 fois l'image de 90°
-    # top_right = image
-    # bottom_right = cv2.rotate(top_right, cv2.ROTATE_90_CLOCKWISE)
-    # bottom_left = cv2.rotate(bottom_right, cv2.ROTATE_90_CLOCKWISE)
-    # top_left = cv2.rotate(bottom_left, cv2.ROTATE_90_CLOCKWISE)
-
-
-    # Rotation for motif that is circle repeating
-    # top_left = image
-    # top_right = cv2.rotate(top_left, cv2.ROTATE_90_CLOCKWISE)
-    # bottom_right = cv2.rotate(top_right, cv2.ROTATE_90_CLOCKWISE)
-    # bottom_left = cv2.rotate(bottom_right, cv2.ROTATE_90_CLOCKWISE)
-
-    # Rotation for motif that is same in top and bottom
-
     top_left = image
     top_right = image
     bottom_right = image
@@ -126,7 +111,6 @@ def generate_motif_colors(img_path:str, output_dir:str, colors:dict, assembly_ty
         resized = cv2.resize(image, (122, 122))
 
         # joint_size = int(image.shape[0]/100)
-        print(f"Assembly tpe: {assembly_type}")
         joint_size = 2
         by_4 = group_by_4(resized, assembly_type, joint_size)
         by_16 = group_by_4(by_4, assembly_type, joint_size)
@@ -137,7 +121,7 @@ def generate_motif_colors(img_path:str, output_dir:str, colors:dict, assembly_ty
         out_img = cv2.resize(by_256, (1990, 1771))
 
         output_path = f"{output_dir}/{colors[hexa]}.png"    
-        #print(output_path)
+        print(output_path)
         cv2.imwrite(output_path, out_img)
 
 
@@ -187,8 +171,6 @@ def generate_9x4_grid(image: object, assembly_type:int, joint_size: int = None) 
     image3 = image
     image4 = image
 
-    print(f"Assembly type var == {assembly_type}")
-
     if assembly_type == 1:
         image1 = image
         image2 = image
@@ -219,25 +201,21 @@ def generate_9x4_grid(image: object, assembly_type:int, joint_size: int = None) 
     rotated_image4 = image
 
     if assembly_type == 1:
-        print("assembly_type == 1")
         image1 = image
         image2 = image
         image3 = image
         image4 = image
     elif assembly_type == 2:
-        print("assembly_type == 2")
         rotated_image1 = image
         rotated_image2 = cv2.rotate(image, cv2.ROTATE_90_COUNTERCLOCKWISE)
         rotated_image3 = image
         rotated_image4 = cv2.rotate(image, cv2.ROTATE_90_COUNTERCLOCKWISE)
     elif assembly_type == 3:
-        print("assembly_type == 3")
         rotated_image1 = cv2.rotate(image, cv2.ROTATE_180) 
         rotated_image2 = cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)
         rotated_image3 = cv2.rotate(image, cv2.ROTATE_180)
         rotated_image4 = cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)
     elif assembly_type == 4:
-        print("assembly_type == 4")
         rotated_image1 = image
         rotated_image2 =  cv2.rotate(image, cv2.ROTATE_180)
         rotated_image3 = image
@@ -305,7 +283,7 @@ def generate_motif_colors_9x4_grid(img_path:str, output_dir:str, colors:dict, as
         out_img = cv2.resize(final_grid, (501, 780))
 
         output_path = f"{output_dir}/{colors[hexa]}.png"    
-        #print(output_path)
+        print(output_path)
         cv2.imwrite(output_path, out_img)
 
 
