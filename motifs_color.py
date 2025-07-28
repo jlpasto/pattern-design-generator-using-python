@@ -93,33 +93,14 @@ def group_by_4(image:object, assembly_type:int, joint_size:int=None) -> object:
     return output_image
 
 
-def generate_motif_colors(img_path:str, output_dir:str, colors:dict, assembly_type:int) -> None:
-    """ Génère le motif décliné sous toutes les couleurs de la liste
-    In:
-        - img_path (str) : chemin vers le motif
-        - output_dir (str) : chemin vers le dossier où va se générer les déclinaisons de couleur
-        - colors (dict) : dictionnaire hexa:nom_de_la_couleur
-        - assembly_type (int) : type d'assemblage (1, 2, 3, 4, 5)
-    Out:
-        /
-    """
+def generate_motif_colors(img_path:str, output_dir:str, colors:dict, assembly_type:int, num_rows:int=2, num_cols:int=2, width:int=1990, height:int=1771) -> None:
     image = cv2.imread(img_path, cv2.IMREAD_UNCHANGED)
-    
     for hexa in colors:
         image[image[:, :, 3] > 50] = list(rgb_to_bgr(*hex_to_rgb(hexa))) + [255]
-        
         resized = cv2.resize(image, (122, 122))
-
-        # joint_size = int(image.shape[0]/100)
         joint_size = 2
-        by_4 = group_by_4(resized, assembly_type, joint_size)
-        by_16 = group_by_4(by_4, assembly_type, joint_size)
-        by_64 = group_by_4(by_16, assembly_type, joint_size)
-        by_256 = group_by_4(by_64, assembly_type, joint_size)
-
-        #out_img = cv2.resize(by_16, (480, 493))
-        out_img = cv2.resize(by_256, (1990, 1771))
-
+        out_img = generate_custom_grid(resized, assembly_type, num_rows, num_cols, joint_size)
+        out_img = cv2.resize(out_img, (width, height))
         output_path = f"{output_dir}/{colors[hexa]}.png"    
         print(output_path)
         cv2.imwrite(output_path, out_img)
@@ -252,39 +233,78 @@ def generate_9x4_grid(image: object, assembly_type:int, joint_size: int = None) 
     return final_9x4_grid
 
 
-def generate_motif_colors_9x4_grid(img_path:str, output_dir:str, colors:dict, assembly_type:int) -> None:
-    """ Génère le motif décliné sous toutes les couleurs de la liste
-    In:
-        - img_path (str) : chemin vers le motif
-        - output_dir (str) : chemin vers le dossier où va se générer les déclinaisons de couleur
-        - colors (dict) : dictionnaire hexa:nom_de_la_couleur
-        - assembly_type (int) : type d'assemblage (1, 2, 3, 4, 5)
-    Out:
-        /
-    """
+def generate_motif_colors_9x4_grid(img_path:str, output_dir:str, colors:dict, assembly_type:int, num_rows:int=9, num_cols:int=4, width:int=501, height:int=780) -> None:
     image = cv2.imread(img_path, cv2.IMREAD_UNCHANGED)
-    
     for hexa in colors:
         image[image[:, :, 3] > 50] = list(rgb_to_bgr(*hex_to_rgb(hexa))) + [255]
-        
         resized_tile = cv2.resize(image, (122, 122))
-
-        # joint_size = int(image.shape[0]/100)
         joint_size = 2
-
-        final_grid = generate_9x4_grid(resized_tile, assembly_type, joint_size)
-
-        # Natural size of a 9x4 grid (122px tiles, 2px joints):
-        # Width: 4 tiles * 122px/tile + 3 joints * 2px/joint = 488 + 6 = 494px
-        # Height: 9 tiles * 122px/tile + 8 joints * 2px/joint = 1098 + 16 = 1114px
-        # Natural aspect ratio: 494 / 1114 approx 0.443
-
-        #out_img = cv2.resize(by_16, (480, 493))
-        out_img = cv2.resize(final_grid, (501, 780))
-
+        final_grid = generate_custom_grid(resized_tile, assembly_type, num_rows, num_cols, joint_size)
+        out_img = cv2.resize(final_grid, (width, height))
         output_path = f"{output_dir}/{colors[hexa]}.png"    
         print(output_path)
         cv2.imwrite(output_path, out_img)
+
+
+def generate_custom_grid(image: object, assembly_type: int, num_rows: int, num_cols: int, joint_size: int = 2) -> object:
+    """
+    Generates a custom grid pattern based on the input image, number of rows and columns, and assembly type.
+    The logic for rotation is preserved as in the original quadrant logic.
+    """
+    marge = int(joint_size / 4)
+    tile_h, tile_w = image.shape[:2]
+    
+    def get_rotated_tile(row, col):
+        # Logic for rotation based on position and assembly_type
+        if assembly_type == 1:
+            return image
+        elif assembly_type == 2:
+            if (row + col) % 2 == 0:
+                return image
+            else:
+                return cv2.rotate(image, cv2.ROTATE_180)
+        elif assembly_type == 3:
+            if (row % 2 == 0 and col % 2 == 0) or (row % 2 == 1 and col % 2 == 1):
+                return image
+            elif row % 2 == 0:
+                return cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)
+            else:
+                return cv2.rotate(image, cv2.ROTATE_90_COUNTERCLOCKWISE)
+        elif assembly_type == 4:
+            if (row % 2 == 0):
+                return image
+            else:
+                return cv2.rotate(image, cv2.ROTATE_180)
+        else:
+            return image
+
+    # Build grid row by row
+    grid_rows = []
+    for row in range(num_rows):
+        row_tiles = []
+        for col in range(num_cols):
+            tile = get_rotated_tile(row, col)
+            row_tiles.append(tile)
+        # Stack horizontally with joints
+        if len(row_tiles) > 1:
+            actual_joint_thickness = joint_size + marge * 2
+            row_img = row_tiles[0]
+            for t in row_tiles[1:]:
+                vertical_joint = np.zeros((tile_h, actual_joint_thickness, 4), dtype=np.uint8)
+                row_img = np.concatenate((row_img, vertical_joint, t), axis=1)
+        else:
+            row_img = row_tiles[0]
+        grid_rows.append(row_img)
+    # Stack rows vertically with joints
+    if len(grid_rows) > 1:
+        actual_joint_thickness = joint_size + marge * 2
+        grid_img = grid_rows[0]
+        for r in grid_rows[1:]:
+            horizontal_joint = np.zeros((actual_joint_thickness, grid_img.shape[1], 4), dtype=np.uint8)
+            grid_img = np.concatenate((grid_img, horizontal_joint, r), axis=0)
+    else:
+        grid_img = grid_rows[0]
+    return grid_img
 
 
 def main():

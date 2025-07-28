@@ -91,12 +91,127 @@ def assemble_pattern_program_numbered():
     if assembly_type_choice == 5:
         print("Type 5 not yet supported")
         sys.exit(0) # Exit the function if the user chose type 5
-    
+
+    if assembly_type_choice == 'both':
+        # Product grid size
+        while True:
+            try:
+                print("\nEnter the number of rows for the PRODUCT grid (default 2):")
+                num_rows_product_input = input("Product Rows: ")
+                num_rows_product = int(num_rows_product_input) if num_rows_product_input.strip() else 2
+                if num_rows_product < 1:
+                    print("Number of rows must be at least 1.")
+                    continue
+                break
+            except ValueError:
+                print("Please enter a valid integer.")
+        while True:
+            try:
+                print("Enter the number of columns for the PRODUCT grid (default 2):")
+                num_cols_product_input = input("Product Columns: ")
+                num_cols_product = int(num_cols_product_input) if num_cols_product_input.strip() else 2
+                if num_cols_product < 1:
+                    print("Number of columns must be at least 1.")
+                    continue
+                break
+            except ValueError:
+                print("Please enter a valid integer.")
+        # Product output dimensions
+        print("\nEnter the output WIDTH in pixels for PRODUCT layer (default: 1990):")
+        width_product_input = input("Product Width: ")
+        width_product = int(width_product_input) if width_product_input.strip() else 1990
+        print("Enter the output HEIGHT in pixels for PRODUCT layer (default: 1771):")
+        height_product_input = input("Product Height: ")
+        height_product = int(height_product_input) if height_product_input.strip() else 1771
+        # Border grid size
+        while True:
+            try:
+                print("\nEnter the number of rows for the BORDER grid (default 9):")
+                num_rows_border_input = input("Border Rows: ")
+                num_rows_border = int(num_rows_border_input) if num_rows_border_input.strip() else 9
+                if num_rows_border < 1:
+                    print("Number of rows must be at least 1.")
+                    continue
+                break
+            except ValueError:
+                print("Please enter a valid integer.")
+        while True:
+            try:
+                print("Enter the number of columns for the BORDER grid (default 4):")
+                num_cols_border_input = input("Border Columns: ")
+                num_cols_border = int(num_cols_border_input) if num_cols_border_input.strip() else 4
+                if num_cols_border < 1:
+                    print("Number of columns must be at least 1.")
+                    continue
+                break
+            except ValueError:
+                print("Please enter a valid integer.")
+        # Border output dimensions
+        print("\nEnter the output WIDTH in pixels for BORDER layer (default: 501):")
+        width_border_input = input("Border Width: ")
+        width_border = int(width_border_input) if width_border_input.strip() else 501
+        print("Enter the output HEIGHT in pixels for BORDER layer (default: 780):")
+        height_border_input = input("Border Height: ")
+        height_border = int(height_border_input) if height_border_input.strip() else 780
+    else:
+        while True:
+            try:
+                print("\nEnter the number of rows for the grid:")
+                print("  - Default 2 for product assembly")
+                print("  - Default 9 for border assembly")
+                num_rows_input = input("Rows: ")
+                num_rows = int(num_rows_input) if num_rows_input.strip() else 2
+                if num_rows < 1:
+                    print("Number of rows must be at least 1.")
+                    continue
+                break
+            except ValueError:
+                print("Please enter a valid integer.")
+        while True:
+            try:
+                print("Enter the number of columns for the grid:")
+                print("  - Default 2 for product assembly") 
+                print("  - Default 4 for border assembly")
+                num_cols_input = input("Columns: ")
+                num_cols = int(num_cols_input) if num_cols_input.strip() else 2
+                if num_cols < 1:
+                    print("Number of columns must be at least 1.")
+                    continue
+                break
+            except ValueError:
+                print("Please enter a valid integer.")
+        # Output dimensions
+        if assembly_type_choice == 'product assembly':
+            print("\nEnter the output WIDTH in pixels for PRODUCT layer (default: 1990):")
+            width_product_input = input("Product Width: ")
+            width_product = int(width_product_input) if width_product_input.strip() else 1990
+            print("Enter the output HEIGHT in pixels for PRODUCT layer (default: 1771):")
+            height_product_input = input("Product Height: ")
+            height_product = int(height_product_input) if height_product_input.strip() else 1771
+        else:
+            print("\nEnter the output WIDTH in pixels for BORDER layer (default: 501):")
+            width_border_input = input("Border Width: ")
+            width_border = int(width_border_input) if width_border_input.strip() else 501
+            print("Enter the output HEIGHT in pixels for BORDER layer (default: 780):")
+            height_border_input = input("Border Height: ")
+            height_border = int(height_border_input) if height_border_input.strip() else 780
 
     print("\n--- Your Assembly Choices ---")
     print(f"Assemble a pattern: {assemble_choice}")
     print(f"Pattern name: {assemble_pattern}")
     print(f"Type of assembly: {assembly_type_choice}")
     print(f"Specific assembly type: {assembly_subtype_choice}")
-
-    return assemble_pattern, assemble_choice, assembly_type_choice, assembly_subtype_choice
+    if assembly_type_choice == 'both':
+        print(f"Product grid size: {num_rows_product} rows x {num_cols_product} columns")
+        print(f"Product output size: {width_product} x {height_product} px")
+        print(f"Border grid size: {num_rows_border} rows x {num_cols_border} columns")
+        print(f"Border output size: {width_border} x {height_border} px")
+        return assemble_pattern, assemble_choice, assembly_type_choice, assembly_subtype_choice, num_rows_product, num_cols_product, width_product, height_product, num_rows_border, num_cols_border, width_border, height_border
+    else:
+        print(f"Grid size: {num_rows} rows x {num_cols} columns")
+        if assembly_type_choice == 'product assembly':
+            print(f"Product output size: {width_product} x {height_product} px")
+            return assemble_pattern, assemble_choice, assembly_type_choice, assembly_subtype_choice, num_rows, num_cols, width_product, height_product
+        else:
+            print(f"Border output size: {width_border} x {height_border} px")
+            return assemble_pattern, assemble_choice, assembly_type_choice, assembly_subtype_choice, num_rows, num_cols, width_border, height_border
