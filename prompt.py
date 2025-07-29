@@ -24,7 +24,64 @@ def assemble_pattern_program_numbered():
 
     if assemble_choice == 'no':
         print("Okay, no pattern assembly will be performed.")
-        sys.exit(0) # Exit the function if the user doesn't want to assemble
+        # Ask for pattern name
+        while True:
+            assemble_pattern = input("Enter the name of the pattern/motif: ")
+            if assemble_pattern.strip() == '':
+                print("Invalid input. Please enter a pattern name.")
+            else:
+                break
+        # # Ask for output size
+        while True:
+            try:
+                print("Enter dimensions for Produit.")
+                width_produit = int(input("Enter output width (default 1990): ") or "1990")
+                height_produit = int(input("Enter output height (default 1771): ") or "1771")
+                break
+            except ValueError:
+                print("Please enter valid integers for width and height.")
+
+        # # Ask for output size
+        while True:
+            try:
+                print("Enter dimensions for Frise.")
+                width_frise = int(input("Enter output width (default 501): ") or "501")
+                height_frise = int(input("Enter output height (default 780): ") or "780")
+                break
+            except ValueError:
+                print("Please enter valid integers for width and height.")
+
+
+        # # Ask if border type
+        while True:
+            print("\nIs this a pattern for border?")
+            print("  1. Yes")
+            print("  2. No")
+
+            try:
+                is_border = input("Enter your choice (1 or 2): ")
+
+                if is_border == '1':
+                    is_border_answer = 'yes'
+                    break
+                elif is_border == '2':
+                    is_border_answer = 'no'
+                    break
+                else:
+                    print("Invalid input. Please enter '1' for Yes or '2' for No.")
+            except ValueError:
+                print("Please enter valid integers for width and height.")
+
+        # Return a dict with the info, including assemble_pattern and assemble_ppatern
+        return {
+            "assemble_choice": "no",
+            "assemble_pattern": assemble_pattern,
+            "width_produit" : width_produit,
+            "height_produit" : height_produit,
+            "width_frise" : width_frise,
+            "height_frise" : height_frise,
+            "is_border_answer": is_border_answer
+        }
          
        
     # What is the name of pattern? (ex. maria)

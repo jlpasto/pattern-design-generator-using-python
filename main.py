@@ -1,7 +1,8 @@
 import os
 from split_pattern import split_colors
-from motifs_color import generate_motif_colors, get_color_tab, generate_motif_colors_9x4_grid
+from motifs_color import generate_motif_colors, get_color_tab, generate_motif_colors_9x4_grid, generate_motif_colors_9x4_grid_no_assembly, generate_motif_layer_no_assembly
 from script_content import generateFriseContent
+from script_border import generateFriseBorder
 from prompt import assemble_pattern_program_numbered
 import argparse
 import cv2
@@ -127,6 +128,63 @@ def main(nom_motif, assemble_choice, assembly_type_choice, assembly_subtype_choi
 
 if __name__ == '__main__':
     prompt_result = assemble_pattern_program_numbered()
+    if isinstance(prompt_result, dict) and prompt_result.get("assemble_choice") == "no":
+        nom_motif = prompt_result["assemble_pattern"]
+        width_produit = prompt_result["width_produit"]
+        height_produit = prompt_result["height_produit"]
+        width_frise = prompt_result["width_frise"]
+        height_frise = prompt_result["height_frise"] 
+        is_border_answer = prompt_result["is_border_answer"] 
+
+
+        # generate motifs
+        pattern_path = f"patterns/{nom_motif}.png"    
+        pattern_output_dir =  f"output/{nom_motif}/motifs"
+        mkdir(pattern_output_dir)
+        split_colors(pattern_path, pattern_output_dir)
+        
+        # generate product and Frise layers
+        Produit = "Produit"
+        Frise = "Frise"
+        Frise_Content = "Frise Content"
+        Frise_Border = "Frise_Border"
+        colors = get_color_tab("correspondance.csv")
+        pattern_output_dir =  f"output/{nom_motif}/motifs"
+        motifs = os.listdir(pattern_output_dir)
+        motifs_output_dir1 = ""
+        motifs_output_dir2 = ""
+        motifs_output_dir2_frise = f"output/{nom_motif}/{Frise}"
+        motifs_output_dir2_frise_content = f"output/{nom_motif}/{Frise_Content}"
+        motifs_output_dir2_frise_border = f"output/{nom_motif}/{Frise_Border}"
+        for motif in motifs:
+            num_motif = motif.split(".")[0]
+            motif_path = f"{pattern_output_dir}/{motif}"
+            motifs_output_dir1 = f"output/{nom_motif}/{Produit}/{num_motif}"
+            motifs_output_dir2 = f"output/{nom_motif}/{Frise}/{num_motif}"
+            mkdir(motifs_output_dir1)
+            mkdir(motifs_output_dir2)
+            generate_motif_layer_no_assembly(motif_path, motifs_output_dir1, colors, width_produit, height_produit)
+            generate_motif_colors_9x4_grid_no_assembly(motif_path, motifs_output_dir2, colors, width_frise, height_frise)
+            print(f"{num_motif} : OK")
+
+
+        # Border frise content
+        base_dir = motifs_output_dir2_frise
+        folders = [f for f in os.listdir(base_dir) if os.path.isdir(os.path.join(base_dir, f))]
+        for folder in folders:
+            output_dir = os.path.join(motifs_output_dir2_frise_content, folder)
+            output_dir_frise_border = os.path.join(motifs_output_dir2_frise_border, folder)
+            input_dir = os.path.join(motifs_output_dir2_frise, folder)
+            print(input_dir)
+            if is_border_answer == "yes":
+                generateFriseBorder(input_dir, output_dir_frise_border)
+            else:
+                generateFriseContent(input_dir, output_dir)
+
+        print("Layer generated with no assembly.")
+        import sys
+        sys.exit(0)
+
     if len(prompt_result) == 12:
         # both: nom_motif, assemble_choice, assembly_type_choice, assembly_subtype_choice, num_rows_product, num_cols_product, width_product, height_product, num_rows_border, num_cols_border, width_border, height_border
         nom_motif, assemble_choice, assembly_type_choice, assembly_subtype_choice, num_rows_product, num_cols_product, width_product, height_product, num_rows_border, num_cols_border, width_border, height_border = prompt_result
@@ -217,6 +275,7 @@ if __name__ == '__main__':
                 generate_motif_colors(motif_path, motifs_output_dir1, colors, assembly_subtype_choice, num_rows_product, num_cols_product, width_product, height_product)
                 generate_motif_colors_9x4_grid(motif_path, motifs_output_dir2, colors, assembly_subtype_choice, num_rows_border, num_cols_border, width_border, height_border)
                 print(f"{num_motif} : OK")
+
             # Border frise content
             base_dir = motifs_output_dir2_frise
             folders = [f for f in os.listdir(base_dir) if os.path.isdir(os.path.join(base_dir, f))]

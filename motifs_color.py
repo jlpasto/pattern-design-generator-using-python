@@ -108,6 +108,33 @@ def generate_motif_colors(img_path:str, output_dir:str, colors:dict, assembly_ty
         cv2.imwrite(output_path, out_img)
 
 
+def generate_motif_layer_no_assembly(
+    img_path: str,
+    output_dir: str,
+    colors: dict,
+    width:int=1990, 
+    height:int=1771
+) -> None:
+    """
+    Generates a single-layer motif image for each color, with no assembly/grid logic.
+    Just recolors and resizes the motif.
+    """
+    image = cv2.imread(img_path, cv2.IMREAD_UNCHANGED)
+    for hexa in colors:
+        recolored = image.copy()
+        if recolored.shape[2] == 4:
+            # Only recolor non-transparent pixels
+            recolored[recolored[:, :, 3] > 50] = list(rgb_to_bgr(*hex_to_rgb(hexa))) + [255]
+        else:
+            recolored[:] = list(rgb_to_bgr(*hex_to_rgb(hexa)))
+        # Use the original image size for width and height
+        #height, width = recolored.shape[:2]
+        resized = cv2.resize(recolored, (width, height))
+        output_path = f"{output_dir}/{colors[hexa]}.png"
+        print(f"Saving: {output_path}")
+        cv2.imwrite(output_path, resized)
+
+
 def stack_horizontal(images: list, joint_size: int, marge: int) -> object:
     """Stacks a list of images horizontally, inserting a joint between each."""
     if not images:
@@ -251,6 +278,15 @@ def generate_motif_colors_9x4_grid(img_path:str, output_dir:str, colors:dict, as
         print(output_path)
         cv2.imwrite(output_path, out_img)
 
+
+def generate_motif_colors_9x4_grid_no_assembly(img_path:str, output_dir:str, colors:dict, width:int=501, height:int=780) -> None:
+    image = cv2.imread(img_path, cv2.IMREAD_UNCHANGED)
+    for hexa in colors:
+        image[image[:, :, 3] > 50] = list(rgb_to_bgr(*hex_to_rgb(hexa))) + [255]
+        out_img = cv2.resize(image, (width, height))
+        output_path = f"{output_dir}/{colors[hexa]}.png"    
+        print(output_path)
+        cv2.imwrite(output_path, out_img)
 
 def generate_custom_grid(image: object, assembly_type: int, num_rows: int, num_cols: int, joint_size: int = 2) -> object:
     """
