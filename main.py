@@ -37,6 +37,11 @@ def main(nom_motif, assemble_choice, assembly_type_choice, assembly_subtype_choi
     if os.path.exists(base_img_path):
         base_img = cv2.imread(base_img_path, cv2.IMREAD_UNCHANGED)
         tile = cv2.resize(base_img, (122, 122))
+
+        top_left = tile
+        top_right = tile
+        bottom_right = tile
+        bottom_left = tile
         # Rotation logic as in motifs_color.py lines 60-79
         if assembly_subtype_choice == 1:
             top_left = tile
@@ -62,7 +67,9 @@ def main(nom_motif, assemble_choice, assembly_type_choice, assembly_subtype_choi
         joint_size = 2
         marge = int(joint_size / 4)
         size = tile.shape[0]
-        output_image = np.zeros((size*2 + joint_size, size*2 + joint_size, 4), dtype=np.uint8)
+        # Get the number of channels from the tile
+        num_channels = tile.shape[2] if len(tile.shape) > 2 else 1
+        output_image = np.zeros((size*2 + joint_size, size*2 + joint_size, num_channels), dtype=np.uint8)
         output_image[0:size, 0:size] = top_left
         output_image[size+joint_size:size*2+joint_size, 0:size] = bottom_left
         output_image[0:size, size+joint_size:size*2+joint_size] = top_right
@@ -167,10 +174,18 @@ if __name__ == '__main__':
                     top_right = cv2.rotate(top_left, cv2.ROTATE_180)
                     bottom_right = cv2.rotate(top_left, cv2.ROTATE_180)
                     bottom_left = tile
+                elif assembly_subtype_choice == 5:
+                    top_left = tile
+                    top_right = cv2.flip(cv2.rotate(top_left, cv2.ROTATE_180), 0)  # rotate 180, then flip vertically
+                    bottom_right = tile
+                    bottom_left = cv2.flip(cv2.rotate(top_left, cv2.ROTATE_180), 0) # rotate 180, then flip vertically
+
                 joint_size = 2
                 marge = int(joint_size / 4)
                 size = tile.shape[0]
-                output_image = np.zeros((size*2 + joint_size, size*2 + joint_size, 4), dtype=np.uint8)
+                # Get the number of channels from the tile
+                num_channels = tile.shape[2] if len(tile.shape) > 2 else 1
+                output_image = np.zeros((size*2 + joint_size, size*2 + joint_size, num_channels), dtype=np.uint8)
                 output_image[0:size, 0:size] = top_left
                 output_image[size+joint_size:size*2+joint_size, 0:size] = bottom_left
                 output_image[0:size, size+joint_size:size*2+joint_size] = top_right

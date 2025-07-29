@@ -44,12 +44,14 @@ def group_by_4(image:object, assembly_type:int, joint_size:int=None) -> object:
         - grouped (cv2.Image) : l'image en quadruple
     """
     size = image.shape[0]
+    # Get the number of channels from the input image
+    num_channels = image.shape[2] if len(image.shape) > 2 else 1
 
     if joint_size is None:
         joint_size = int(size/100)
     marge = int(joint_size/4)
 
-    output_image = np.zeros((size*2 + joint_size, size*2 + joint_size, 4), dtype=np.uint8)
+    output_image = np.zeros((size*2 + joint_size, size*2 + joint_size, num_channels), dtype=np.uint8)
 
     top_left = image
     top_right = image
@@ -78,8 +80,8 @@ def group_by_4(image:object, assembly_type:int, joint_size:int=None) -> object:
         bottom_right = cv2.rotate(top_left, cv2.ROTATE_180)
         bottom_left = image
 
-    horizontal_joint = np.zeros((joint_size+marge*2, size*2+joint_size, 4), dtype=np.uint8)
-    vertical_joint = np.zeros((size*2+joint_size, joint_size+marge*2, 4), dtype=np.uint8)
+    horizontal_joint = np.zeros((joint_size+marge*2, size*2+joint_size, num_channels), dtype=np.uint8)
+    vertical_joint = np.zeros((size*2+joint_size, joint_size+marge*2, num_channels), dtype=np.uint8)
 
     output_image[0:size, 0:size] = top_left
     output_image[size+joint_size:size*2+joint_size, 0:size] = bottom_left
@@ -112,8 +114,10 @@ def stack_horizontal(images: list, joint_size: int, marge: int) -> object:
         return None
     actual_joint_thickness = joint_size + marge * 2
     result = images[0]
+    # Get the number of channels from the first image
+    num_channels = result.shape[2] if len(result.shape) > 2 else 1
     for i in range(1, len(images)):
-        vertical_joint = np.zeros((images[0].shape[0], actual_joint_thickness, 4), dtype=np.uint8)
+        vertical_joint = np.zeros((images[0].shape[0], actual_joint_thickness, num_channels), dtype=np.uint8)
         result = np.concatenate((result, vertical_joint, images[i]), axis=1)
     return result
 
@@ -123,8 +127,10 @@ def stack_vertical(images: list, joint_size: int, marge: int) -> object:
         return None
     actual_joint_thickness = joint_size + marge * 2
     result = images[0]
+    # Get the number of channels from the first image
+    num_channels = result.shape[2] if len(result.shape) > 2 else 1
     for i in range(1, len(images)):
-        horizontal_joint = np.zeros((actual_joint_thickness, images[0].shape[1], 4), dtype=np.uint8)
+        horizontal_joint = np.zeros((actual_joint_thickness, images[0].shape[1], num_channels), dtype=np.uint8)
         result = np.concatenate((result, horizontal_joint, images[i]), axis=0)
     return result
 
@@ -253,6 +259,8 @@ def generate_custom_grid(image: object, assembly_type: int, num_rows: int, num_c
     """
     marge = int(joint_size / 4)
     tile_h, tile_w = image.shape[:2]
+    # Get the number of channels from the input image
+    num_channels = image.shape[2] if len(image.shape) > 2 else 1
     
     def get_rotated_tile(row, col):
         # Logic for rotation based on position and assembly_type
@@ -275,6 +283,20 @@ def generate_custom_grid(image: object, assembly_type: int, num_rows: int, num_c
                 return image
             else:
                 return cv2.rotate(image, cv2.ROTATE_180)
+        elif assembly_type == 5:
+            # For assembly_type 5, alternate flip/rotate for odd columns, but flip logic for even/odd rows
+            if row % 2 == 0:
+                # Even row: normal/rotated pattern
+                if col % 2 == 0:
+                    return image
+                else:
+                    return cv2.flip(cv2.rotate(image, cv2.ROTATE_180), 0)
+            else:
+                # Odd row: invert the pattern
+                if col % 2 == 0:
+                    return cv2.flip(cv2.rotate(image, cv2.ROTATE_180), 0)
+                else:
+                    return image
         else:
             return image
 
@@ -290,7 +312,7 @@ def generate_custom_grid(image: object, assembly_type: int, num_rows: int, num_c
             actual_joint_thickness = joint_size + marge * 2
             row_img = row_tiles[0]
             for t in row_tiles[1:]:
-                vertical_joint = np.zeros((tile_h, actual_joint_thickness, 4), dtype=np.uint8)
+                vertical_joint = np.zeros((tile_h, actual_joint_thickness, num_channels), dtype=np.uint8)
                 row_img = np.concatenate((row_img, vertical_joint, t), axis=1)
         else:
             row_img = row_tiles[0]
@@ -300,7 +322,7 @@ def generate_custom_grid(image: object, assembly_type: int, num_rows: int, num_c
         actual_joint_thickness = joint_size + marge * 2
         grid_img = grid_rows[0]
         for r in grid_rows[1:]:
-            horizontal_joint = np.zeros((actual_joint_thickness, grid_img.shape[1], 4), dtype=np.uint8)
+            horizontal_joint = np.zeros((actual_joint_thickness, grid_img.shape[1], num_channels), dtype=np.uint8)
             grid_img = np.concatenate((grid_img, horizontal_joint, r), axis=0)
     else:
         grid_img = grid_rows[0]
