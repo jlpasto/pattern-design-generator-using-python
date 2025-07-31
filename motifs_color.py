@@ -95,7 +95,7 @@ def group_by_4(image:object, assembly_type:int, joint_size:int=None) -> object:
     return output_image
 
 
-def generate_motif_colors(img_path:str, output_dir:str, colors:dict, assembly_type:int, num_rows:int=2, num_cols:int=2, width:int=1990, height:int=1771) -> None:
+def generate_motif_colors(num_motif:str, img_path:str, output_dir:str, colors:dict, assembly_type:int, num_rows:int=2, num_cols:int=2, width:int=1990, height:int=1771) -> None:
     image = cv2.imread(img_path, cv2.IMREAD_UNCHANGED)
     for hexa in colors:
         image[image[:, :, 3] > 50] = list(rgb_to_bgr(*hex_to_rgb(hexa))) + [255]
@@ -103,7 +103,7 @@ def generate_motif_colors(img_path:str, output_dir:str, colors:dict, assembly_ty
         joint_size = 2
         out_img = generate_custom_grid(resized, assembly_type, num_rows, num_cols, joint_size)
         out_img = cv2.resize(out_img, (width, height))
-        output_path = f"{output_dir}/{colors[hexa]}.png"    
+        output_path = f"{output_dir}/{num_motif}-{colors[hexa]}.png"    
         print(output_path)
         cv2.imwrite(output_path, out_img)
 
@@ -266,7 +266,7 @@ def generate_9x4_grid(image: object, assembly_type:int, joint_size: int = None) 
     return final_9x4_grid
 
 
-def generate_motif_colors_9x4_grid(img_path:str, output_dir:str, colors:dict, assembly_type:int, num_rows:int=9, num_cols:int=4, width:int=501, height:int=780) -> None:
+def generate_motif_colors_9x4_grid(num_motif:str, img_path:str, output_dir:str, colors:dict, assembly_type:int, num_rows:int=9, num_cols:int=4, width:int=501, height:int=780) -> None:
     image = cv2.imread(img_path, cv2.IMREAD_UNCHANGED)
     for hexa in colors:
         image[image[:, :, 3] > 50] = list(rgb_to_bgr(*hex_to_rgb(hexa))) + [255]
@@ -274,7 +274,7 @@ def generate_motif_colors_9x4_grid(img_path:str, output_dir:str, colors:dict, as
         joint_size = 2
         final_grid = generate_custom_grid(resized_tile, assembly_type, num_rows, num_cols, joint_size)
         out_img = cv2.resize(final_grid, (width, height))
-        output_path = f"{output_dir}/{colors[hexa]}.png"    
+        output_path = f"{output_dir}/{num_motif}-{colors[hexa]}.png"    
         print(output_path)
         cv2.imwrite(output_path, out_img)
 
@@ -315,10 +315,18 @@ def generate_custom_grid(image: object, assembly_type: int, num_rows: int, num_c
             else:
                 return cv2.rotate(image, cv2.ROTATE_90_COUNTERCLOCKWISE)
         elif assembly_type == 4:
-            if (row % 2 == 0):
-                return image
+            if row % 2 == 0:
+                # Even row: left normal, right mirrored
+                if col % 2 == 0:
+                    return image
+                else:
+                    return cv2.flip(image, 1)
             else:
-                return cv2.rotate(image, cv2.ROTATE_180)
+                # Odd row: invert pattern -> left mirrored, right normal
+                if col % 2 == 0:
+                    return image
+                else:
+                    return cv2.flip(image, 1)
         elif assembly_type == 5:
             # For assembly_type 5, alternate flip/rotate for odd columns, but flip logic for even/odd rows
             if row % 2 == 0:

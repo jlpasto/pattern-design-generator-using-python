@@ -61,9 +61,14 @@ def main(nom_motif, assemble_choice, assembly_type_choice, assembly_subtype_choi
             bottom_left = cv2.rotate(top_right, cv2.ROTATE_180)
         elif assembly_subtype_choice == 4:
             top_left = tile
-            top_right = cv2.rotate(top_left, cv2.ROTATE_180)
-            bottom_right = cv2.rotate(top_left, cv2.ROTATE_180)
+            top_right = cv2.flip(top_left, 1)  # 1 = horizontal flip
+            bottom_right = cv2.flip(top_left, 1)  # 1 = horizontal flip
             bottom_left = tile
+        elif assembly_subtype_choice == 5:
+            top_left = tile
+            top_right = cv2.flip(cv2.rotate(top_left, cv2.ROTATE_180), 0)  # rotate 180, then flip vertically
+            bottom_right = tile
+            bottom_left = cv2.flip(cv2.rotate(top_left, cv2.ROTATE_180), 0) # rotate 180, then flip vertically
         # Assemble 2x2 grid
         joint_size = 2
         marge = int(joint_size / 4)
@@ -105,14 +110,14 @@ def main(nom_motif, assemble_choice, assembly_type_choice, assembly_subtype_choi
         if assembly_type_choice == "both":
             mkdir(motifs_output_dir1)
             mkdir(motifs_output_dir2)   
-            generate_motif_colors(motif_path, motifs_output_dir1, colors, assembly_subtype_choice, num_rows, num_cols, width, height) # generate layer 1
-            generate_motif_colors_9x4_grid(motif_path, motifs_output_dir2, colors, assembly_subtype_choice, num_rows, num_cols, width, height) # generate layer 2
+            generate_motif_colors(num_motif, motif_path, motifs_output_dir1, colors, assembly_subtype_choice, num_rows, num_cols, width, height) # generate layer 1
+            generate_motif_colors_9x4_grid(num_motif, motif_path, motifs_output_dir2, colors, assembly_subtype_choice, num_rows, num_cols, width, height) # generate layer 2
         if assembly_type_choice == "product assembly":
             mkdir(motifs_output_dir1)
-            generate_motif_colors(motif_path, motifs_output_dir1, colors, assembly_subtype_choice, num_rows, num_cols, width, height) # generate layer 1
+            generate_motif_colors(num_motif, motif_path, motifs_output_dir1, colors, assembly_subtype_choice, num_rows, num_cols, width, height) # generate layer 1
         if assembly_type_choice == "border assembly":
             mkdir(motifs_output_dir2)
-            generate_motif_colors_9x4_grid(motif_path, motifs_output_dir2, colors, assembly_subtype_choice, num_rows, num_cols, width, height) # generate layer 2
+            generate_motif_colors_9x4_grid(num_motif, motif_path, motifs_output_dir2, colors, assembly_subtype_choice, num_rows, num_cols, width, height) # generate layer 2
         print(f"{num_motif} : OK")
 
     # generate frise content
@@ -229,8 +234,8 @@ if __name__ == '__main__':
                     bottom_left = cv2.rotate(top_right, cv2.ROTATE_180)
                 elif assembly_subtype_choice == 4:
                     top_left = tile
-                    top_right = cv2.rotate(top_left, cv2.ROTATE_180)
-                    bottom_right = cv2.rotate(top_left, cv2.ROTATE_180)
+                    top_right = cv2.flip(top_left, 1)  # 1 = horizontal flip
+                    bottom_right = cv2.flip(top_left, 1)  # 1 = horizontal flip
                     bottom_left = tile
                 elif assembly_subtype_choice == 5:
                     top_left = tile
@@ -272,8 +277,8 @@ if __name__ == '__main__':
                 motifs_output_dir2 = f"output/{nom_motif}/{Frise}/{num_motif}"
                 mkdir(motifs_output_dir1)
                 mkdir(motifs_output_dir2)
-                generate_motif_colors(motif_path, motifs_output_dir1, colors, assembly_subtype_choice, num_rows_product, num_cols_product, width_product, height_product)
-                generate_motif_colors_9x4_grid(motif_path, motifs_output_dir2, colors, assembly_subtype_choice, num_rows_border, num_cols_border, width_border, height_border)
+                generate_motif_colors(num_motif, motif_path, motifs_output_dir1, colors, assembly_subtype_choice, num_rows_product, num_cols_product, width_product, height_product)
+                generate_motif_colors_9x4_grid(num_motif, motif_path, motifs_output_dir2, colors, assembly_subtype_choice, num_rows_border, num_cols_border, width_border, height_border)
                 print(f"{num_motif} : OK")
 
             # Border frise content
