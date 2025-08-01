@@ -106,16 +106,16 @@ def make_valid_url(filename):
     # 3️⃣ Replace spaces with dashes
     name = re.sub(r'\s+', '-', name.strip())
     
-    # 4️⃣ Remove any non-alphanumeric, dash, or underscore characters
+    # # 4️⃣ Remove any non-alphanumeric, dash, or underscore characters
     name = re.sub(r'[^A-Za-z0-9\-_]', '-', name)
     
     # 5️⃣ Normalize multiple dashes
     name = re.sub(r'-{2,}', '-', name)
     
-    # 6️⃣ Encode to make URL-safe (if needed)
-    safe_name = urllib.parse.quote(name)
+    # # 6️⃣ Encode to make URL-safe (if needed)
+    # safe_name = urllib.parse.quote(name)
     
-    return f"{safe_name}.{ext}"
+    return f"{name}.{ext}"
     
 def generate_motif_colors(nom_motif:str, num_motif:str, img_path:str, output_dir:str, colors:dict, assembly_type:int, num_rows:int=2, num_cols:int=2, width:int=1990, height:int=1771) -> None:
     image = cv2.imread(img_path, cv2.IMREAD_UNCHANGED)
