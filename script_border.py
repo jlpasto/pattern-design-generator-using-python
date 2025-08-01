@@ -29,7 +29,10 @@ def generateFriseBorder(input_dir, output_dir):
 
             input_path = os.path.join(root, file)
             rel_path = os.path.relpath(input_path, input_dir)
-            output_path = os.path.join(output_dir, rel_path)
+            base_name, ext = os.path.splitext(os.path.basename(file))
+            Frise_Border = "Border"
+            new_name = f"{base_name}-{Frise_Border}{ext}"
+            output_path = os.path.join(output_dir, new_name)
             os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
             try:

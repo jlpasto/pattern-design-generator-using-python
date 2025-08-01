@@ -30,8 +30,11 @@ def generateFriseContent(input_dir, output_dir):
                 continue
 
             input_path = os.path.join(root, file)
+            base_name, ext = os.path.splitext(os.path.basename(file))
+            Frise_Content = "Content"
+            new_name = f"{base_name}-{Frise_Content}{ext}"
             rel_path = os.path.relpath(input_path, input_dir)
-            output_path = os.path.join(output_dir, rel_path)
+            output_path = os.path.join(output_dir, new_name)
             os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
             try:

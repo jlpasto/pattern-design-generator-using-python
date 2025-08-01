@@ -152,7 +152,7 @@ if __name__ == '__main__':
         Produit = "Produit"
         Frise = "Frise"
         Frise_Content = "Frise Content"
-        Frise_Border = "Frise_Border"
+        Frise_Border = "Frise Border"
         colors = get_color_tab("correspondance.csv")
         pattern_output_dir =  f"output/{nom_motif}/motifs"
         motifs = os.listdir(pattern_output_dir)
