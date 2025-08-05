@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 import re
 import urllib.parse
-
+from generate_hexapattern import generate_hexapattern
 NOM_MOTIF = "monceau"
 
 
@@ -118,13 +118,21 @@ def make_valid_url(filename):
     return f"{name}.{ext}"
     
 def generate_motif_colors(nom_motif:str, num_motif:str, img_path:str, output_dir:str, colors:dict, assembly_type:int, num_rows:int=2, num_cols:int=2, width:int=1990, height:int=1771) -> None:
+    
+
     image = cv2.imread(img_path, cv2.IMREAD_UNCHANGED)
     for hexa in colors:
         image[image[:, :, 3] > 50] = list(rgb_to_bgr(*hex_to_rgb(hexa))) + [255]
-        resized = cv2.resize(image, (122, 122))
-        joint_size = 2
-        out_img = generate_custom_grid(resized, assembly_type, num_rows, num_cols, joint_size)
-        out_img = cv2.resize(out_img, (width, height))
+
+        if assembly_type in (1,2,3,4,5):
+            resized = cv2.resize(image, (122, 122))
+            joint_size = 2
+            out_img = generate_custom_grid(resized, assembly_type, num_rows, num_cols, joint_size)
+            out_img = cv2.resize(out_img, (width, height))
+        else: # if assembly_type = 6
+            out_img = generate_hexapattern(nom_motif, img_path, image, num_rows = num_rows, num_cols = num_cols, num_motif=num_motif)
+            out_img = cv2.resize(out_img, (width, height))
+
         Produit = "Produit"
         renamed_img = make_valid_url(f"{nom_motif}-{num_motif}-{colors[hexa]}-{Produit}.png")
         output_path = f"{output_dir}/{renamed_img}"    
@@ -293,15 +301,39 @@ def generate_9x4_grid(image: object, assembly_type:int, joint_size: int = None) 
 
     return final_9x4_grid
 
+    image = cv2.imread(img_path, cv2.IMREAD_UNCHANGED)
+    for hexa in colors:
+        image[image[:, :, 3] > 50] = list(rgb_to_bgr(*hex_to_rgb(hexa))) + [255]
+
+        if assembly_type in (1,2,3,4,5):
+            resized = cv2.resize(image, (122, 122))
+            joint_size = 2
+            out_img = generate_custom_grid(resized, assembly_type, num_rows, num_cols, joint_size)
+            out_img = cv2.resize(out_img, (width, height))
+        else: # if assembly_type = 6
+            out_img = generate_hexapattern(nom_motif, img_path, image, num_rows = num_rows, num_cols = num_cols, num_motif=num_motif)
+            out_img = cv2.resize(out_img, (width, height))
+
+        Produit = "Produit"
+        renamed_img = make_valid_url(f"{nom_motif}-{num_motif}-{colors[hexa]}-{Produit}.png")
+        output_path = f"{output_dir}/{renamed_img}"    
+        print(output_path)
+        cv2.imwrite(output_path, out_img)
 
 def generate_motif_colors_9x4_grid(nom_motif:str, num_motif:str, img_path:str, output_dir:str, colors:dict, assembly_type:int, num_rows:int=9, num_cols:int=4, width:int=501, height:int=780) -> None:
     image = cv2.imread(img_path, cv2.IMREAD_UNCHANGED)
     for hexa in colors:
         image[image[:, :, 3] > 50] = list(rgb_to_bgr(*hex_to_rgb(hexa))) + [255]
-        resized_tile = cv2.resize(image, (122, 122))
-        joint_size = 2
-        final_grid = generate_custom_grid(resized_tile, assembly_type, num_rows, num_cols, joint_size)
-        out_img = cv2.resize(final_grid, (width, height))
+
+        if assembly_type in (1,2,3,4,5):
+            resized_tile = cv2.resize(image, (122, 122))
+            joint_size = 2
+            final_grid = generate_custom_grid(resized_tile, assembly_type, num_rows, num_cols, joint_size)
+            out_img = cv2.resize(final_grid, (width, height))
+        else: # if assembly_type = 6
+            out_img = generate_hexapattern(nom_motif, img_path, image, num_rows = num_rows, num_cols = num_cols, num_motif=num_motif)
+            out_img = cv2.resize(out_img, (width, height))    
+            
         Frise = "Frise"
         renamed_img = make_valid_url(f"{nom_motif}-{num_motif}-{colors[hexa]}-{Frise}.png")
         output_path = f"{output_dir}/{renamed_img}"    

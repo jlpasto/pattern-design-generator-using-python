@@ -1,10 +1,10 @@
 import os
-from split_pattern import split_colors
+from split_pattern import split_colors, split_colors_no_resize
 from motifs_color import generate_motif_colors, get_color_tab, generate_motif_colors_9x4_grid, generate_motif_colors_9x4_grid_no_assembly, generate_motif_layer_no_assembly
 from script_content import generateFriseContent
 from script_border import generateFriseBorder
 from prompt import assemble_pattern_program_numbered
-from generate_hexapattern import generate_pattern_6
+from generate_hexapattern import generate_hexapattern
 import argparse
 import cv2
 import numpy as np
@@ -25,12 +25,7 @@ def main(nom_motif, assemble_choice, assembly_type_choice, assembly_subtype_choi
     mkdir("output/" + nom_motif + "/" + Frise)
     mkdir("output/" + nom_motif + "/" + Frise_Content)
 
-    # Sépare les couleurs du pattern pour récupérer les différents motifs
-    pattern_path = f"patterns/{nom_motif}.png"    
-    pattern_output_dir =  f"output/{nom_motif}/motifs"
-    mkdir(pattern_output_dir)
-    split_colors(pattern_path, pattern_output_dir)
-    print("Motifs séparés")
+
 
     # Generate sample assembly image first for user to check
     sample_dir = f"output/{nom_motif}/Sample Assembly"
@@ -89,12 +84,23 @@ def main(nom_motif, assemble_choice, assembly_type_choice, assembly_subtype_choi
             output_image[:, size-marge:size+joint_size+marge] = 0
         elif assembly_subtype_choice == 6:
             print("Handle pattern 6")
-            output_image = generate_pattern_6(nom_motif, base_img_path)
+            output_image = generate_hexapattern(nom_motif, base_img_path, image=None, num_rows=num_rows, num_cols=num_cols)
             
-
         sample_path = os.path.join(sample_dir, f"sample_assembly_image.png")
         cv2.imwrite(sample_path, output_image)
         print(f"Sample assembly image generated: {sample_path}")
+            
+
+        # Sépare les couleurs du pattern pour récupérer les différents motifs
+        pattern_path = f"patterns/{nom_motif}.png"    
+        pattern_output_dir =  f"output/{nom_motif}/motifs"
+        mkdir(pattern_output_dir)
+        if assembly_subtype_choice == 6:
+            split_colors_no_resize(pattern_path, pattern_output_dir, nom_motif)
+        else:
+            split_colors(pattern_path, pattern_output_dir)
+        print("Motifs séparés")
+
         print("Please check the sample image and type '1' to continue with layer generation:")
         user_input = input()
         if user_input != '1':
@@ -212,15 +218,7 @@ if __name__ == '__main__':
             mkdir("output/" + nom_motif + "/" + Frise)
             mkdir("output/" + nom_motif + "/" + Frise_Content)
 
-            pattern_path = f"patterns/{nom_motif}.png"    
-            pattern_output_dir =  f"output/{nom_motif}/motifs"
-            mkdir(pattern_output_dir)
-            split_colors(pattern_path, pattern_output_dir)
-            print("Motifs séparés")
 
-            # Sample image for product
-            sample_dir = f"output/{nom_motif}/Sample Assembly"
-            mkdir(sample_dir)
             base_img_path = f"patterns/{nom_motif}.png"
             if os.path.exists(base_img_path):
                 base_img = cv2.imread(base_img_path, cv2.IMREAD_UNCHANGED)
@@ -269,11 +267,30 @@ if __name__ == '__main__':
                     output_image[:, size-marge:size+joint_size+marge] = 0
                 elif assembly_subtype_choice == 6:
                     print("Handle pattern 6")
-                    output_image = generate_pattern_6(nom_motif, base_img_path)
+                    output_image = generate_hexapattern(nom_motif, base_img_path, image=None, num_rows=num_rows_product, num_cols=num_cols_product)
+
+
+
+                # Sample image for product
+                sample_dir = f"output/{nom_motif}/Sample Assembly"
+                mkdir(sample_dir)
 
                 sample_path = os.path.join(sample_dir, f"sample_assembly_image.png")
                 cv2.imwrite(sample_path, output_image)
                 print(f"Sample assembly image generated: {sample_path}")
+
+
+                # Sépare les couleurs du pattern pour récupérer les différents motifs
+                pattern_path = f"patterns/{nom_motif}.png"    
+                pattern_output_dir =  f"output/{nom_motif}/motifs"
+                mkdir(pattern_output_dir)
+                if assembly_subtype_choice == 6:
+                    split_colors_no_resize(pattern_path, pattern_output_dir, nom_motif)
+                else:
+                    split_colors(pattern_path, pattern_output_dir)
+                print("Motifs séparés")
+
+
                 print("Please check the sample image and type '1' to continue with layer generation:")
                 user_input = input()
                 if user_input != '1':

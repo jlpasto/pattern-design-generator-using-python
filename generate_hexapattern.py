@@ -2,11 +2,54 @@ import cv2
 import numpy as np
 import math
 
+import numpy as np
 
-def generate_pattern_6(nom_motif, base_img_path):
-    print("Generating sample pattern 6")
+def crop_to_content(image: np.ndarray) -> np.ndarray:
+    """
+    Crops a 4-channel (BGRA) image to the smallest possible bounding box
+    that contains all non-transparent pixels.
+
+    Args:
+        image (np.ndarray): The input image with an alpha channel.
+
+    Returns:
+        np.ndarray: The cropped image. Returns the original image if
+                    it's fully transparent.
+    """
+    # Get the alpha channel (the 4th channel, index 3)
+    alpha_channel = image[:, :, 3]
+
+    # Find the coordinates of all pixels where the alpha value is greater than 0
+    y_coords, x_coords = np.where(alpha_channel > 0)
+
+    # If there are no non-transparent pixels, the image is empty.
+    # Return the original image or an empty array.
+    if y_coords.size == 0:
+        print("Warning: Image is fully transparent. No cropping performed.")
+        return image
+
+    # Find the minimum and maximum coordinates to define the bounding box
+    y_min, y_max = np.min(y_coords), np.max(y_coords)
+    x_min, x_max = np.min(x_coords), np.max(x_coords)
+
+    # Slice the original image using the bounding box coordinates
+    # We add 1 to the max coordinates because Python slicing is exclusive of the end index
+    cropped_image = image[y_min:y_max + 1, x_min:x_max + 1]
+
+    return cropped_image
+
+def generate_hexapattern(nom_motif, base_img_path, image = None, num_rows = 3, num_cols = 3, num_motif = ""):
+    #print("Generating sample pattern 6")
+
+    if num_motif == "Background":
+        return image
+    
     # Load the hexagon tile with alpha channel (RGBA)
-    tile = cv2.imread(f"{base_img_path}", cv2.IMREAD_UNCHANGED)
+    if image is None:
+        tile = cv2.imread(f"{base_img_path}", cv2.IMREAD_UNCHANGED)
+    else:
+        tile = image
+
     if tile is None:
         raise FileNotFoundError(f"{nom_motif}.png not found or failed to load.")
 
@@ -17,12 +60,16 @@ def generate_pattern_6(nom_motif, base_img_path):
     dy = int(tile_h * 0.990)      # vertical step (sin 60°) original = 0.866
 
     # Define the number of rows and columns
-    rows = 3
-    cols = 3
+    rows = num_rows
+    cols = num_cols
 
     # Compute canvas size large enough to hold all tiles
-    canvas_width = dx * cols + tile_w
-    canvas_height = dy * rows + tile_h
+    canvas_width = dx * cols + tile_w - (tile_w - (tile_w /4))
+    canvas_height = dy * rows + tile_h - (tile_h /2)
+
+    # Ensure canvas dimensions are integers before creating the array
+    canvas_width = int(canvas_width)
+    canvas_height = int(canvas_height)
 
     # Create a blank canvas with 4 channels (RGBA)
     canvas = np.zeros((canvas_height, canvas_width, 4), dtype=np.uint8)
