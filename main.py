@@ -9,12 +9,57 @@ from gui import get_pattern_assembly_params
 import argparse
 import cv2
 import numpy as np
+from PIL import Image, ImageTk
+import tkinter as tk
+from tkinter import messagebox
+import warnings
+
+# Suppress decompression bomb warning
+warnings.simplefilter('ignore', Image.DecompressionBombWarning)
+Image.MAX_IMAGE_PIXELS = None  # disable limit
 
 
 def mkdir(name):
     if not os.path.exists(name):
         os.makedirs(name)
 
+def ask_user_with_image(image_path):
+    def on_ok():
+        root.user_choice = True
+        root.destroy()
+
+    def on_cancel():
+        root.user_choice = False
+        root.destroy()
+
+    root = tk.Tk()
+    root.title("Sample Image Preview")
+    root.geometry("700x600")
+    root.resizable(False, False)
+    root.user_choice = False  # default
+
+    # Load and show the image
+    img = Image.open(image_path)
+    img = img.resize((500, 400), Image.Resampling.LANCZOS)
+    img_tk = ImageTk.PhotoImage(img)
+
+    panel = tk.Label(root, image=img_tk)
+    panel.pack(pady=10)
+
+    label = tk.Label(root, text="This is the sample generated image.\nClick OK to proceed or Cancel to Exit.", font=("Arial", 12))
+    label.pack(pady=10)
+
+    btn_frame = tk.Frame(root)
+    btn_frame.pack(pady=10)
+
+    ok_button = tk.Button(btn_frame, text="OK", width=10, command=on_ok)
+    ok_button.pack(side=tk.LEFT, padx=10)
+
+    cancel_button = tk.Button(btn_frame, text="Cancel", width=10, command=on_cancel)
+    cancel_button.pack(side=tk.RIGHT, padx=10)
+
+    root.mainloop()
+    return root.user_choice
 
 def main(nom_motif, assemble_choice, assembly_type_choice, assembly_subtype_choice, num_rows=2, num_cols=2, width=1990, height=1771):
     Produit = "Produit"
@@ -102,11 +147,18 @@ def main(nom_motif, assemble_choice, assembly_type_choice, assembly_subtype_choi
             split_colors(pattern_path, pattern_output_dir)
         print("Motifs séparés")
 
-        print("Please check the sample image and type '1' to continue with layer generation:")
-        user_input = input()
-        if user_input != '1':
+        # print("Please check the sample image and type '1' to continue with layer generation:")
+        # user_input = input()
+        # if user_input != '1':
+        #     print("Layer generation cancelled.")
+        #     return
+
+        if not ask_user_with_image(sample_path):
             print("Layer generation cancelled.")
-            return
+            exit()
+
+        print("Continuing with layer generation...")
+        print("Please wait until process is complete...")
 
         # Récupère les motifs générés
         colors = get_color_tab("correspondance.csv")
@@ -224,6 +276,10 @@ if __name__ == '__main__':
             pattern_output_dir = ""
 
             base_img_path = f"patterns/{nom_motif}.png"
+            if not os.path.exists(base_img_path):
+                print("Patter do not exist")
+                sys.exit()
+
             if os.path.exists(base_img_path):
                 base_img = cv2.imread(base_img_path, cv2.IMREAD_UNCHANGED)
                 tile = cv2.resize(base_img, (122, 122))
@@ -270,7 +326,7 @@ if __name__ == '__main__':
                     output_image[size-marge:size+joint_size+marge, :] = 0
                     output_image[:, size-marge:size+joint_size+marge] = 0
                 elif assembly_subtype_choice == 6:
-                    print("Handle pattern 6")
+                    #print("Handle pattern 6")
                     output_image = generate_hexapattern(nom_motif, base_img_path, image=None, num_rows=num_rows_product, num_cols=num_cols_product)
 
 
@@ -295,11 +351,18 @@ if __name__ == '__main__':
                 print("Motifs séparés")
 
 
-                print("Please check the sample image and type '1' to continue with layer generation:")
-                user_input = input()
-                if user_input != '1':
+                # print("Please check the sample image and type '1' to continue with layer generation:")
+                # user_input = input()
+                # if user_input != '1':
+                #     print("Layer generation cancelled.")
+                #     return
+
+                if not ask_user_with_image(sample_path):
                     print("Layer generation cancelled.")
-                    return
+                    exit()
+
+                print("Continuing with layer generation...")
+                print("Please wait until process is complete...")
 
             colors = get_color_tab("correspondance.csv")
             motifs = os.listdir(pattern_output_dir)
