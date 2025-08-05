@@ -125,7 +125,8 @@ def assemble_pattern_program_numbered():
         print("  3. Type 3")
         print("  4. Type 4")
         print("  5. Type 5")
-        assembly_subtype_choice_num = input("Enter your choice (1-5): ")
+        print("  6. Type 6")
+        assembly_subtype_choice_num = input("Enter your choice (1-6): ")
 
         if assembly_subtype_choice_num == '1':
             assembly_subtype_choice = 1
@@ -142,12 +143,11 @@ def assemble_pattern_program_numbered():
         elif assembly_subtype_choice_num == '5':
             assembly_subtype_choice = 5
             break
+        elif assembly_subtype_choice_num == '6':
+            assembly_subtype_choice = 6
+            break
         else:
-            print("Invalid input. Please enter a number between 1 and 5.")
-
-    if assembly_type_choice == 5:
-        print("Type 5 not yet supported")
-        sys.exit(0) # Exit the function if the user chose type 5
+            print("Invalid input. Please enter a number between 1 and 6.")
 
     if assembly_type_choice == 'both':
         # Product grid size

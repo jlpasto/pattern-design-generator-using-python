@@ -4,6 +4,7 @@ from motifs_color import generate_motif_colors, get_color_tab, generate_motif_co
 from script_content import generateFriseContent
 from script_border import generateFriseBorder
 from prompt import assemble_pattern_program_numbered
+from generate_hexapattern import generate_pattern_6
 import argparse
 import cv2
 import numpy as np
@@ -69,20 +70,28 @@ def main(nom_motif, assemble_choice, assembly_type_choice, assembly_subtype_choi
             top_right = cv2.flip(cv2.rotate(top_left, cv2.ROTATE_180), 0)  # rotate 180, then flip vertically
             bottom_right = tile
             bottom_left = cv2.flip(cv2.rotate(top_left, cv2.ROTATE_180), 0) # rotate 180, then flip vertically
-        # Assemble 2x2 grid
-        joint_size = 2
-        marge = int(joint_size / 4)
-        size = tile.shape[0]
-        # Get the number of channels from the tile
-        num_channels = tile.shape[2] if len(tile.shape) > 2 else 1
-        output_image = np.zeros((size*2 + joint_size, size*2 + joint_size, num_channels), dtype=np.uint8)
-        output_image[0:size, 0:size] = top_left
-        output_image[size+joint_size:size*2+joint_size, 0:size] = bottom_left
-        output_image[0:size, size+joint_size:size*2+joint_size] = top_right
-        output_image[size+joint_size:size*2+joint_size, size+joint_size:size*2+joint_size] = bottom_right
-        # Joints
-        output_image[size-marge:size+joint_size+marge, :] = 0
-        output_image[:, size-marge:size+joint_size+marge] = 0
+
+        output_image = None
+        if assembly_subtype_choice in (1, 2, 3, 4, 5):
+            # Assemble 2x2 grid
+            joint_size = 2
+            marge = int(joint_size / 4)
+            size = tile.shape[0]
+            # Get the number of channels from the tile
+            num_channels = tile.shape[2] if len(tile.shape) > 2 else 1
+            output_image = np.zeros((size*2 + joint_size, size*2 + joint_size, num_channels), dtype=np.uint8)
+            output_image[0:size, 0:size] = top_left
+            output_image[size+joint_size:size*2+joint_size, 0:size] = bottom_left
+            output_image[0:size, size+joint_size:size*2+joint_size] = top_right
+            output_image[size+joint_size:size*2+joint_size, size+joint_size:size*2+joint_size] = bottom_right
+            # Joints
+            output_image[size-marge:size+joint_size+marge, :] = 0
+            output_image[:, size-marge:size+joint_size+marge] = 0
+        elif assembly_subtype_choice == 6:
+            print("Handle pattern 6")
+            output_image = generate_pattern_6(nom_motif, base_img_path)
+            
+
         sample_path = os.path.join(sample_dir, f"sample_assembly_image.png")
         cv2.imwrite(sample_path, output_image)
         print(f"Sample assembly image generated: {sample_path}")
@@ -243,18 +252,25 @@ if __name__ == '__main__':
                     bottom_right = tile
                     bottom_left = cv2.flip(cv2.rotate(top_left, cv2.ROTATE_180), 0) # rotate 180, then flip vertically
 
-                joint_size = 2
-                marge = int(joint_size / 4)
-                size = tile.shape[0]
-                # Get the number of channels from the tile
-                num_channels = tile.shape[2] if len(tile.shape) > 2 else 1
-                output_image = np.zeros((size*2 + joint_size, size*2 + joint_size, num_channels), dtype=np.uint8)
-                output_image[0:size, 0:size] = top_left
-                output_image[size+joint_size:size*2+joint_size, 0:size] = bottom_left
-                output_image[0:size, size+joint_size:size*2+joint_size] = top_right
-                output_image[size+joint_size:size*2+joint_size, size+joint_size:size*2+joint_size] = bottom_right
-                output_image[size-marge:size+joint_size+marge, :] = 0
-                output_image[:, size-marge:size+joint_size+marge] = 0
+                output_image = None
+                if assembly_subtype_choice in (1,2,3,4,5):
+
+                    joint_size = 2
+                    marge = int(joint_size / 4)
+                    size = tile.shape[0]
+                    # Get the number of channels from the tile
+                    num_channels = tile.shape[2] if len(tile.shape) > 2 else 1
+                    output_image = np.zeros((size*2 + joint_size, size*2 + joint_size, num_channels), dtype=np.uint8)
+                    output_image[0:size, 0:size] = top_left
+                    output_image[size+joint_size:size*2+joint_size, 0:size] = bottom_left
+                    output_image[0:size, size+joint_size:size*2+joint_size] = top_right
+                    output_image[size+joint_size:size*2+joint_size, size+joint_size:size*2+joint_size] = bottom_right
+                    output_image[size-marge:size+joint_size+marge, :] = 0
+                    output_image[:, size-marge:size+joint_size+marge] = 0
+                elif assembly_subtype_choice == 6:
+                    print("Handle pattern 6")
+                    output_image = generate_pattern_6(nom_motif, base_img_path)
+
                 sample_path = os.path.join(sample_dir, f"sample_assembly_image.png")
                 cv2.imwrite(sample_path, output_image)
                 print(f"Sample assembly image generated: {sample_path}")
