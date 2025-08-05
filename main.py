@@ -5,6 +5,7 @@ from script_content import generateFriseContent
 from script_border import generateFriseBorder
 from prompt import assemble_pattern_program_numbered
 from generate_hexapattern import generate_hexapattern
+from gui import get_pattern_assembly_params
 import argparse
 import cv2
 import numpy as np
@@ -107,33 +108,33 @@ def main(nom_motif, assemble_choice, assembly_type_choice, assembly_subtype_choi
             print("Layer generation cancelled.")
             return
 
-    # Récupère les motifs générés
-    colors = get_color_tab("correspondance.csv")
-    motifs = os.listdir(pattern_output_dir)
+        # Récupère les motifs générés
+        colors = get_color_tab("correspondance.csv")
+        motifs = os.listdir(pattern_output_dir)
 
-    motifs_output_dir1 = ""
-    motifs_output_dir2 = ""
-    motifs_output_dir2_frise = f"output/{nom_motif}/{Frise}"
-    motifs_output_dir2_frise_content = f"output/{nom_motif}/{Frise_Content}"
-    
-    for motif in motifs:
-        num_motif = motif.split(".")[0]
-        motif_path = f"{pattern_output_dir}/{motif}"
-        motifs_output_dir1 = f"output/{nom_motif}/{Produit}/{num_motif}"
-        motifs_output_dir2 = f"output/{nom_motif}/{Frise}/{num_motif}"
+        motifs_output_dir1 = ""
+        motifs_output_dir2 = ""
+        motifs_output_dir2_frise = f"output/{nom_motif}/{Frise}"
+        motifs_output_dir2_frise_content = f"output/{nom_motif}/{Frise_Content}"
         
-        if assembly_type_choice == "both":
-            mkdir(motifs_output_dir1)
-            mkdir(motifs_output_dir2)   
-            generate_motif_colors(nom_motif, num_motif, motif_path, motifs_output_dir1, colors, assembly_subtype_choice, num_rows, num_cols, width, height) # generate layer 1
-            generate_motif_colors_9x4_grid(nom_motif, num_motif, motif_path, motifs_output_dir2, colors, assembly_subtype_choice, num_rows, num_cols, width, height) # generate layer 2
-        if assembly_type_choice == "product assembly":
-            mkdir(motifs_output_dir1)
-            generate_motif_colors(nom_motif, num_motif, motif_path, motifs_output_dir1, colors, assembly_subtype_choice, num_rows, num_cols, width, height) # generate layer 1
-        if assembly_type_choice == "border assembly":
-            mkdir(motifs_output_dir2)
-            generate_motif_colors_9x4_grid(nom_motif, num_motif, motif_path, motifs_output_dir2, colors, assembly_subtype_choice, num_rows, num_cols, width, height) # generate layer 2
-        print(f"{num_motif} : OK")
+        for motif in motifs:
+            num_motif = motif.split(".")[0]
+            motif_path = f"{pattern_output_dir}/{motif}"
+            motifs_output_dir1 = f"output/{nom_motif}/{Produit}/{num_motif}"
+            motifs_output_dir2 = f"output/{nom_motif}/{Frise}/{num_motif}"
+            
+            if assembly_type_choice == "both":
+                mkdir(motifs_output_dir1)
+                mkdir(motifs_output_dir2)   
+                generate_motif_colors(nom_motif, num_motif, motif_path, motifs_output_dir1, colors, assembly_subtype_choice, num_rows, num_cols, width, height) # generate layer 1
+                generate_motif_colors_9x4_grid(nom_motif, num_motif, motif_path, motifs_output_dir2, colors, assembly_subtype_choice, num_rows, num_cols, width, height) # generate layer 2
+            if assembly_type_choice == "product assembly":
+                mkdir(motifs_output_dir1)
+                generate_motif_colors(nom_motif, num_motif, motif_path, motifs_output_dir1, colors, assembly_subtype_choice, num_rows, num_cols, width, height) # generate layer 1
+            if assembly_type_choice == "border assembly":
+                mkdir(motifs_output_dir2)
+                generate_motif_colors_9x4_grid(nom_motif, num_motif, motif_path, motifs_output_dir2, colors, assembly_subtype_choice, num_rows, num_cols, width, height) # generate layer 2
+            print(f"{num_motif} : OK")
 
     # generate frise content
     if assembly_type_choice == "border assembly":
@@ -147,7 +148,9 @@ def main(nom_motif, assemble_choice, assembly_type_choice, assembly_subtype_choi
 
 
 if __name__ == '__main__':
-    prompt_result = assemble_pattern_program_numbered()
+    #prompt_result = assemble_pattern_program_numbered()
+    prompt_result = get_pattern_assembly_params()
+    print(f"prompt result {prompt_result}")
     if isinstance(prompt_result, dict) and prompt_result.get("assemble_choice") == "no":
         nom_motif = prompt_result["assemble_pattern"]
         width_produit = prompt_result["width_produit"]
@@ -218,6 +221,7 @@ if __name__ == '__main__':
             mkdir("output/" + nom_motif + "/" + Frise)
             mkdir("output/" + nom_motif + "/" + Frise_Content)
 
+            pattern_output_dir = ""
 
             base_img_path = f"patterns/{nom_motif}.png"
             if os.path.exists(base_img_path):
