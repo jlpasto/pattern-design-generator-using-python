@@ -47,6 +47,7 @@ def generate_hexapattern(nom_motif, base_img_path, image = None, num_rows = 3, n
     # Load the hexagon tile with alpha channel (RGBA)
     if image is None:
         tile = cv2.imread(f"{base_img_path}", cv2.IMREAD_UNCHANGED)
+        tile = cv2.resize(tile, (122, 106))
     else:
         tile = image
 
