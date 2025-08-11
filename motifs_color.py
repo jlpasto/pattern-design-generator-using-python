@@ -301,24 +301,6 @@ def generate_9x4_grid(image: object, assembly_type:int, joint_size: int = None) 
 
     return final_9x4_grid
 
-    image = cv2.imread(img_path, cv2.IMREAD_UNCHANGED)
-    for hexa in colors:
-        image[image[:, :, 3] > 50] = list(rgb_to_bgr(*hex_to_rgb(hexa))) + [255]
-
-        if assembly_type in (1,2,3,4,5):
-            resized = cv2.resize(image, (122, 122))
-            joint_size = 2
-            out_img = generate_custom_grid(resized, assembly_type, num_rows, num_cols, joint_size)
-            out_img = cv2.resize(out_img, (width, height))
-        else: # if assembly_type = 6
-            out_img = generate_hexapattern(nom_motif, img_path, image, num_rows = num_rows, num_cols = num_cols, num_motif=num_motif)
-            out_img = cv2.resize(out_img, (width, height))
-
-        Produit = "Produit"
-        renamed_img = make_valid_url(f"{nom_motif}-{num_motif}-{colors[hexa]}-{Produit}.png")
-        output_path = f"{output_dir}/{renamed_img}"    
-        print(output_path)
-        cv2.imwrite(output_path, out_img)
 
 def generate_motif_colors_9x4_grid(nom_motif:str, num_motif:str, img_path:str, output_dir:str, colors:dict, assembly_type:int, num_rows:int=9, num_cols:int=4, width:int=501, height:int=780) -> None:
     image = cv2.imread(img_path, cv2.IMREAD_UNCHANGED)
@@ -371,13 +353,19 @@ def generate_custom_grid(image: object, assembly_type: int, num_rows: int, num_c
                 return image
             else:
                 return cv2.rotate(image, cv2.ROTATE_180)
+            
         elif assembly_type == 3:
-            if (row % 2 == 0 and col % 2 == 0) or (row % 2 == 1 and col % 2 == 1):
-                return image
-            elif row % 2 == 0:
-                return cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)
-            else:
-                return cv2.rotate(image, cv2.ROTATE_90_COUNTERCLOCKWISE)
+            if row % 2 == 0:  # top row of block
+                if col % 2 == 0:
+                    return cv2.rotate(image, cv2.ROTATE_90_COUNTERCLOCKWISE)  # top_left
+                else:
+                    return image  # top_right
+            else:  # bottom row of block
+                if col % 2 == 0:
+                    return cv2.rotate(image, cv2.ROTATE_180)  # bottom_left
+                else:
+                    return cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)  # bottom_right
+
         elif assembly_type == 4:
             if row % 2 == 0:
                 # Even row: left normal, right mirrored
